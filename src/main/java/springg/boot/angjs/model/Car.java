@@ -3,15 +3,12 @@ package springg.boot.angjs.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
-import javax.persistence.Id;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
-@ToString @EqualsAndHashCode
+@EqualsAndHashCode
 public class Car {
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private @NonNull String name;
     private @NonNull String number;

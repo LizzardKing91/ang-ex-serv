@@ -33,13 +33,25 @@ public class CarServiceImpl implements CarService {
         return carRepository.existsById(id);
     }
 
+    public boolean isCarExist(Car car) throws Exception {
+        try {
+            if(car.getId() != null){
+                return true;
+            }
+            return car.getNumber() != null;
+        }
+        catch (IllegalArgumentException ex){
+            throw new Exception(ex.getMessage());
+        }
+    }
+
     @Override
     public Optional<Car> getCarById(Long id) {
         return carRepository.findById(id);
     }
 
     @Override
-    public void saveOrUpdate(Car car) {
+    public void create(Car car) {
         carRepository.save(car);
     }
 

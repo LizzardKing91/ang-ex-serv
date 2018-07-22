@@ -15,9 +15,11 @@ public interface CarService {
 
     public boolean isCarExist(Long id);
 
+    public boolean isCarExist(Car car) throws Exception;
+
     public Optional<Car> getCarById(Long id);
 
-    public void saveOrUpdate(Car car);
+    public void create(Car car);
 
     public Car getCarByNumber(String number);
 
