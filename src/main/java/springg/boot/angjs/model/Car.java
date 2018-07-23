@@ -2,8 +2,11 @@ package springg.boot.angjs.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @EqualsAndHashCode
@@ -11,11 +14,14 @@ public class Car {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private @NonNull String name;
-    private @NonNull String number;
+    private @NonNull @Column(unique = true) String number;
     private boolean isAvailable;
+    @Nullable
     private String currentPoint;
     @ManyToOne
     private RentPoint rentPoint;
+    @OneToMany
+    private List<History> historyList;
 
     public
     Car() {
@@ -33,12 +39,13 @@ public class Car {
         this.currentPoint = currentPoint;
     }
 
-    public Car(String name, String number, boolean isAvailable, String currentPoint, RentPoint rentPoint) {
+    public Car(String name, String number, boolean isAvailable, String currentPoint, RentPoint rentPoint, List<History> historyList) {
         this.name = name;
         this.number = number;
         this.isAvailable = isAvailable;
         this.currentPoint = currentPoint;
         this.rentPoint = rentPoint;
+        this.historyList = historyList;
     }
 
     public
@@ -92,6 +99,14 @@ public class Car {
 
     public void setRentPoint(RentPoint rentPoint) {
         this.rentPoint = rentPoint;
+    }
+
+    public List<History> getHistoryList() {
+        return historyList;
+    }
+
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
     }
 
     @Override

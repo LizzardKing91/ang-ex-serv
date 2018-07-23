@@ -13,10 +13,6 @@ public interface CarService {
 
     public List<Car> getAvailableCars();
 
-    public boolean isCarExist(Long id);
-
-    public boolean isCarExist(Car car) throws Exception;
-
     public Optional<Car> getCarById(Long id);
 
     public void create(Car car);

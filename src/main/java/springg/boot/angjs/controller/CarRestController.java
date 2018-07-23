@@ -66,7 +66,7 @@ public class CarRestController {
 
     @PutMapping("/car/{id}")
     @CrossOrigin(origins = "http://localhost:4200")
-    public ResponseEntity<Object> updateStudent(@RequestBody Car car, @PathVariable long id) {
+    public ResponseEntity<Object> updateCar(@RequestBody Car car, @PathVariable long id) {
 
         Optional<Car> carOptional = carService.getCarById(id);
 
@@ -82,7 +82,7 @@ public class CarRestController {
 
     @CrossOrigin(origins = "http://localhost:4200")
     @DeleteMapping("/car/{id}")
-    public void deleteStudent(@PathVariable long id) {
+    public void deleteCar(@PathVariable long id) {
         carService.deleteCar(id);
     }
 
