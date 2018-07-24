@@ -86,8 +86,6 @@ public class CarRestController {
 
         car.setId(id);
 
-        rentService.setCarList(car);
-
         carService.create(car);
 
         return ResponseEntity.noContent().build();

@@ -38,14 +38,10 @@ public class History {
     @Temporal(TIMESTAMP)
     private Date finalDate;
 
-    @ManyToOne
-    @JsonIgnore
-    private Car car;
-
     public History() {
     }
 
-    public History(String carName, String carNumber, String renterName, String startPoint, String finalPoint, Date startDate, Date finalDate, Car car) {
+    public History(String carName, String carNumber, String renterName, String startPoint, String finalPoint, Date startDate, Date finalDate) {
         this.carName = carName;
         this.carNumber = carNumber;
         this.renterName = renterName;
@@ -53,7 +49,6 @@ public class History {
         this.finalPoint = finalPoint;
         this.startDate = startDate;
         this.finalDate = finalDate;
-        this.car = car;
     }
 
     public long getId() {
@@ -118,15 +113,5 @@ public class History {
 
     public void setFinalDate(Date finalDate) {
         this.finalDate = finalDate;
-    }
-
-    @JsonIgnore
-    public Car getCar() {
-        return car;
-    }
-
-    @JsonIgnore
-    public void setCar(Car car) {
-        this.car = car;
     }
 }

@@ -11,6 +11,7 @@ import springg.boot.angjs.repository.RentPointRepository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -86,6 +87,23 @@ public class RentServiceImpl implements RentService {
         if(car.getCurrentPoint() != null){
             RentPoint point = rentPointRepository.getRentPointByAddress(car.getCurrentPoint());
             List<Car> newCarList = point.getCarList();
+            newCarList.add(car);
+            point.setCarList(newCarList);
+            rentPointRepository.save(point);
+        }
+    }
+
+    @Override
+    public void updateCarList(Car car) {
+        long id = car.getId();
+        if(car.getCurrentPoint() != null){
+            RentPoint point = rentPointRepository.getRentPointByAddress(car.getCurrentPoint());
+            List<Car> newCarList = point.getCarList();
+            Optional<Car> carToDelete = newCarList.stream().filter(car1 -> car.getId() == id).findFirst();
+            if(!carToDelete.isPresent()) {
+                newCarList.add(car);
+            }
+            newCarList.remove(carToDelete.get());
             newCarList.add(car);
             point.setCarList(newCarList);
             rentPointRepository.save(point);

@@ -1,11 +1,9 @@
 package springg.boot.angjs.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -21,10 +19,6 @@ public class Car {
 
     @OneToMany
     private List<History> historyList;
-
-    @ManyToOne
-    @JsonIgnore
-    private RentPoint point;
 
     public
     Car() {
@@ -48,15 +42,6 @@ public class Car {
         this.isAvailable = isAvailable;
         this.currentPoint = currentPoint;
         this.historyList = historyList;
-    }
-
-    public Car(String name, String number, boolean isAvailable, String currentPoint, List<History> historyList, RentPoint point) {
-        this.name = name;
-        this.number = number;
-        this.isAvailable = isAvailable;
-        this.currentPoint = currentPoint;
-        this.historyList = historyList;
-        this.point = point;
     }
 
     public
@@ -109,14 +94,6 @@ public class Car {
 
     public void setHistoryList(List<History> historyList) {
         this.historyList = historyList;
-    }
-
-    public RentPoint getPoint() {
-        return point;
-    }
-
-    public void setPoint(RentPoint point) {
-        this.point = point;
     }
 
     @Override

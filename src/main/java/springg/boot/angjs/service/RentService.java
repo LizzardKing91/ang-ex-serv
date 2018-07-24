@@ -14,5 +14,7 @@ public interface RentService {
 
     void setCarList(Car car);
 
+    public void updateCarList(Car car);
+
     void deleteCarFromCarList(Car car);
 }

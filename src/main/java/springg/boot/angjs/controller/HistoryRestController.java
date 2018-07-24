@@ -59,11 +59,11 @@ public class HistoryRestController {
             return ResponseEntity.badRequest().build();
         }
         history.setStartDate(date);
-        history.setCar(currentCar);
         history.setStartPoint(currentCar.getCurrentPoint());
         history.setCarName(currentCar.getName());
         historyService.createHistory(history);
         rentService.rentCar(history);
+        rentService.setCarList(currentCar);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(history.getId()).toUri();
@@ -84,7 +84,6 @@ public class HistoryRestController {
         Date date = new Date(System.currentTimeMillis());
         history.setFinalDate(date);
         history.setStartDate(historyNote.get().getStartDate());
-        history.setCar(historyNote.get().getCar());
         history.setStartPoint(historyNote.get().getStartPoint());
         history.setCarName(historyNote.get().getCarName());
 
