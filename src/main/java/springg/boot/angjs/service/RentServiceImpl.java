@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import springg.boot.angjs.model.Car;
 import springg.boot.angjs.model.History;
+import springg.boot.angjs.model.RentPoint;
 import springg.boot.angjs.repository.CarRepository;
 import springg.boot.angjs.repository.HistoryRepository;
+import springg.boot.angjs.repository.RentPointRepository;
 
 import java.util.Date;
 import java.util.List;
@@ -15,22 +17,25 @@ import java.util.stream.Collectors;
 @Service
 public class RentServiceImpl implements RentService {
     private HistoryRepository historyRepository;
-
+    private RentPointRepository rentPointRepository;
     private CarRepository carRepository;
 
     @Autowired
-    public RentServiceImpl(HistoryRepository historyRepository, CarRepository carRepository) {
+    public RentServiceImpl(HistoryRepository historyRepository, CarRepository carRepository, RentPointRepository rentPointRepository) {
         this.historyRepository = historyRepository;
         this.carRepository = carRepository;
+        this.rentPointRepository = rentPointRepository;
     }
 
     @Override
     public void rentCar(History history) {
         Car rentedCar = carRepository.getCarByNumber(history.getCarNumber());
-
+        RentPoint point = rentPointRepository.getRentPointByAddress(rentedCar.getCurrentPoint());
+        point.getCarList().remove(rentedCar);
         rentedCar.setAvailable(false);
         rentedCar.setCurrentPoint(null);
         carRepository.save(rentedCar);
+        rentPointRepository.save(point);
     }
 
     @Override
@@ -43,9 +48,11 @@ public class RentServiceImpl implements RentService {
         historyList.add(history);
         rentedCar.setHistoryList(historyList);
         History updHistory = historyRepository.getOne(history.getId());
-
         updHistory.setFinalPoint(rentPointAddress);
+        RentPoint point = rentPointRepository.getRentPointByAddress(rentedCar.getCurrentPoint());
+        point.getCarList().add(rentedCar);
 
+        rentPointRepository.save(point);
         historyRepository.save(updHistory);
         carRepository.save(rentedCar);
     }
@@ -72,6 +79,28 @@ public class RentServiceImpl implements RentService {
 
     public Car getCurrentCar(String number) {
         return carRepository.getCarByNumber(number);
+    }
+
+    @Override
+    public void setCarList(Car car) {
+        if(car.getCurrentPoint() != null){
+            RentPoint point = rentPointRepository.getRentPointByAddress(car.getCurrentPoint());
+            List<Car> newCarList = point.getCarList();
+            newCarList.add(car);
+            point.setCarList(newCarList);
+            rentPointRepository.save(point);
+        }
+    }
+
+    @Override
+    public void deleteCarFromCarList(Car car) {
+        if(car.getCurrentPoint() != null){
+            RentPoint point = rentPointRepository.getRentPointByAddress(car.getCurrentPoint());
+            List<Car> newCarList = point.getCarList();
+            newCarList.remove(car);
+            point.setCarList(newCarList);
+            rentPointRepository.save(point);
+        }
     }
 
     private static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {

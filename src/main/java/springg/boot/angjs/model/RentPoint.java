@@ -2,10 +2,7 @@ package springg.boot.angjs.model;
 
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -18,7 +15,7 @@ public class RentPoint {
 
     private String address;
 
-    @OneToMany(mappedBy = "rentPoint")
+    @OneToMany(cascade = CascadeType.REFRESH)
     private List<Car> carList;
 
     public RentPoint() {

@@ -1,12 +1,14 @@
 package springg.boot.angjs.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import springg.boot.angjs.model.Car;
 import springg.boot.angjs.service.CarService;
 import springg.boot.angjs.service.CarServiceImpl;
+import springg.boot.angjs.service.RentService;
 
 import java.net.URI;
 import java.util.Collection;
@@ -17,10 +19,12 @@ import java.util.stream.Collectors;
 public class CarRestController {
 
     private CarService carService;
+    private RentService rentService;
 
     @Autowired
-    public CarRestController(CarServiceImpl carService){
+    public CarRestController(CarServiceImpl carService, RentService rentService){
         this.carService = carService;
+        this.rentService = rentService;
     }
 
     @GetMapping("/cars")
@@ -55,7 +59,13 @@ public class CarRestController {
     @PostMapping("/cars")
     @CrossOrigin(origins = "http://localhost:4200")
     public ResponseEntity<Object> createCar(@RequestBody Car car) {
+        if(carService.getCarByNumber(car.getNumber()) != null) {
+            return ResponseEntity.badRequest().build();
+        }
+
         carService.create(car);
+
+        rentService.setCarList(car);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(car.getId()).toUri();
@@ -64,7 +74,8 @@ public class CarRestController {
 
     }
 
-    @PutMapping("/car/{id}")
+    @PutMapping("/cars/{id}")
+    @ResponseStatus(HttpStatus.OK)
     @CrossOrigin(origins = "http://localhost:4200")
     public ResponseEntity<Object> updateCar(@RequestBody Car car, @PathVariable long id) {
 
@@ -75,15 +86,18 @@ public class CarRestController {
 
         car.setId(id);
 
+        rentService.setCarList(car);
+
         carService.create(car);
 
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/cars/{id}")
+    @ResponseStatus(HttpStatus.OK)
     @CrossOrigin(origins = "http://localhost:4200")
-    @DeleteMapping("/car/{id}")
     public void deleteCar(@PathVariable long id) {
+        rentService.deleteCarFromCarList(carService.getCarById(id).get());
         carService.deleteCar(id);
     }
-
 }

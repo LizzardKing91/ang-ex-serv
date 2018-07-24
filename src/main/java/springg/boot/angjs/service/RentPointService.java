@@ -15,4 +15,6 @@ public interface RentPointService {
 
     void createRentPoint(RentPoint rentPoint);
 
+    RentPoint getRentPointByAddress(String address);
+
 }

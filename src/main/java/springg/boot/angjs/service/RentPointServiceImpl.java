@@ -37,4 +37,9 @@ public class RentPointServiceImpl implements RentPointService{
     public void createRentPoint(RentPoint rentPoint) {
         repository.save(rentPoint);
     }
+
+    @Override
+    public RentPoint getRentPointByAddress(String address) {
+        return repository.getRentPointByAddress(address);
+    }
 }

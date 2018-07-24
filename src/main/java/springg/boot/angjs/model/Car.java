@@ -18,10 +18,13 @@ public class Car {
     private boolean isAvailable;
     @Nullable
     private String currentPoint;
-    @ManyToOne
-    private RentPoint rentPoint;
+
     @OneToMany
     private List<History> historyList;
+
+    @ManyToOne
+    @JsonIgnore
+    private RentPoint point;
 
     public
     Car() {
@@ -39,13 +42,21 @@ public class Car {
         this.currentPoint = currentPoint;
     }
 
-    public Car(String name, String number, boolean isAvailable, String currentPoint, RentPoint rentPoint, List<History> historyList) {
+    public Car(String name, String number, boolean isAvailable, String currentPoint, List<History> historyList) {
         this.name = name;
         this.number = number;
         this.isAvailable = isAvailable;
         this.currentPoint = currentPoint;
-        this.rentPoint = rentPoint;
         this.historyList = historyList;
+    }
+
+    public Car(String name, String number, boolean isAvailable, String currentPoint, List<History> historyList, RentPoint point) {
+        this.name = name;
+        this.number = number;
+        this.isAvailable = isAvailable;
+        this.currentPoint = currentPoint;
+        this.historyList = historyList;
+        this.point = point;
     }
 
     public
@@ -92,21 +103,20 @@ public class Car {
         this.currentPoint = currentPoint;
     }
 
-    @JsonIgnore
-    public RentPoint getRentPoint() {
-        return rentPoint;
-    }
-
-    public void setRentPoint(RentPoint rentPoint) {
-        this.rentPoint = rentPoint;
-    }
-
     public List<History> getHistoryList() {
         return historyList;
     }
 
     public void setHistoryList(List<History> historyList) {
         this.historyList = historyList;
+    }
+
+    public RentPoint getPoint() {
+        return point;
+    }
+
+    public void setPoint(RentPoint point) {
+        this.point = point;
     }
 
     @Override

@@ -11,4 +11,8 @@ public interface RentService {
     public float getAverageTime(String address, String carName);
 
     public Car getCurrentCar(String number);
+
+    void setCarList(Car car);
+
+    void deleteCarFromCarList(Car car);
 }
