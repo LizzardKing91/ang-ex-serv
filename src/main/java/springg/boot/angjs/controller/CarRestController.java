@@ -11,6 +11,7 @@ import springg.boot.angjs.service.CarServiceImpl;
 import springg.boot.angjs.service.RentService;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,9 +52,13 @@ public class CarRestController {
     @GetMapping("cars/available/{rentPointAddress}")
     @CrossOrigin(origins = "http://localhost:4200")
     public Collection<Car> getAvailableCarsAtCurrentPoint(@PathVariable("rentPointAddress") String rentPointAddress){
-        return carService.getAvailableCars()
-                .stream().filter(car -> car.getCurrentPoint().
-                        equals(rentPointAddress)).collect(Collectors.toList());
+        if(rentPointAddress != null){
+            return carService.getAvailableCars()
+                    .stream().filter(car ->  car.getCurrentPoint()
+                            .equals(rentPointAddress))
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     @PostMapping("/cars")
@@ -77,16 +82,33 @@ public class CarRestController {
     @PutMapping("/cars/{id}")
     @ResponseStatus(HttpStatus.OK)
     @CrossOrigin(origins = "http://localhost:4200")
-    public ResponseEntity<Object> updateCar(@RequestBody Car car, @PathVariable long id) {
+    public ResponseEntity<Object> updateCar(@RequestBody Car newCar, @PathVariable long id) {
 
-        Optional<Car> carOptional = carService.getCarById(id);
+        Optional<Car> oldCar = carService.getCarById(id);
 
-        if (!carOptional.isPresent())
+        if (!oldCar.isPresent())
             return ResponseEntity.notFound().build();
 
-        car.setId(id);
+        String oldAddress = oldCar.get().getCurrentPoint();
 
-        carService.create(car);
+        if(newCar.getName() != null) {
+            oldCar.get().setName(newCar.getName());
+        }
+
+        if(newCar.getNumber() != null) {
+            oldCar.get().setNumber(newCar.getNumber());
+        }
+
+        if((newCar.getCurrentPoint() != null && rentService.checkRentPoint(newCar.getCurrentPoint()))) {
+            oldCar.get().setCurrentPoint(newCar.getCurrentPoint());
+        }
+        if(newCar.getCurrentPoint() != null && !newCar.getCurrentPoint().equals(oldAddress)) {
+            rentService.deleteCarFromCarList(oldAddress, oldCar.get().getId());
+            rentService.setCarList(oldCar.get());
+        }
+
+        carService.create(oldCar.get());
+        rentService.updateHistoryList(oldCar.get());
 
         return ResponseEntity.noContent().build();
     }
@@ -95,7 +117,7 @@ public class CarRestController {
     @ResponseStatus(HttpStatus.OK)
     @CrossOrigin(origins = "http://localhost:4200")
     public void deleteCar(@PathVariable long id) {
-        rentService.deleteCarFromCarList(carService.getCarById(id).get());
+        rentService.deleteCarFromCarList(carService.getCarById(id).get().getCurrentPoint(), id);
         carService.deleteCar(id);
     }
 }

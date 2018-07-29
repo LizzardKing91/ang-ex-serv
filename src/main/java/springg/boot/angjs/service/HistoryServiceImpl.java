@@ -2,9 +2,7 @@ package springg.boot.angjs.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import springg.boot.angjs.model.Car;
 import springg.boot.angjs.model.History;
-import springg.boot.angjs.repository.CarRepository;
 import springg.boot.angjs.repository.HistoryRepository;
 
 import java.util.List;
@@ -41,4 +39,5 @@ public class HistoryServiceImpl implements HistoryService {
 
         return history;
     }
+
 }

@@ -13,9 +13,10 @@ public class RentPoint {
     @GeneratedValue
     private Long id;
 
+    @Column(unique = true)
     private String address;
 
-    @OneToMany(cascade = CascadeType.REFRESH)
+    @OneToMany
     private List<Car> carList;
 
     public RentPoint() {

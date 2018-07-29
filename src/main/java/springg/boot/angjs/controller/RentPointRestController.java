@@ -1,11 +1,13 @@
 package springg.boot.angjs.controller;
 
 import javassist.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import springg.boot.angjs.model.RentPoint;
 import springg.boot.angjs.service.RentPointService;
+import springg.boot.angjs.service.RentService;
 
 import java.net.URI;
 import java.util.Collection;
@@ -15,9 +17,12 @@ import java.util.Optional;
 public class RentPointRestController {
 
     private RentPointService rentPointService;
+    private RentService rentService;
 
-    public RentPointRestController(RentPointService rentPointService){
+    @Autowired
+    public RentPointRestController(RentPointService rentPointService, RentService rentService){
         this.rentPointService = rentPointService;
+        this.rentService = rentService;
     }
 
     @GetMapping("/points")
@@ -51,23 +56,35 @@ public class RentPointRestController {
 
     @PutMapping("/points/{id}")
     @CrossOrigin(origins = "http://localhost:4200")
-    public ResponseEntity<Object> updateRentPoint(@RequestBody RentPoint point, @PathVariable long id) {
-        Optional<RentPoint> rentPoint = rentPointService.getRentPoint(id);
+    public ResponseEntity<Object> updateRentPoint(@RequestBody RentPoint newPoint, @PathVariable long id) {
+        Optional<RentPoint> oldPoint = rentPointService.getRentPoint(id);
 
-        if(!rentPoint.isPresent()) {
+        if(!oldPoint.isPresent()) {
             return ResponseEntity.notFound().build();
         }
 
-        point.setId(id);
+        newPoint.setId(id);
+        newPoint.setCarList(oldPoint.get().getCarList());
 
-        rentPointService.createRentPoint(point);
+        String oldAddress = oldPoint.get().getAddress();
+
+        rentService.updateRentPointAddressForCar(newPoint, oldAddress);
+
+        rentPointService.createRentPoint(newPoint);
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/points/{id}")
     @CrossOrigin(origins = "http://localhost:4200")
-    public void deletePoint(@PathVariable long id) {
+    public ResponseEntity<Object> deletePoint(@PathVariable long id) {
+        if(!rentPointService.getRentPoint(id).isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        rentService.deleteRentPointAddressForCar(rentPointService.getRentPoint(id).get());
         rentPointService.deleteRentPoint(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
