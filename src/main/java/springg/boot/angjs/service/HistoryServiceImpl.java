@@ -9,6 +9,7 @@ import springg.boot.angjs.repository.HistoryRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class HistoryServiceImpl implements HistoryService {
@@ -40,5 +41,10 @@ public class HistoryServiceImpl implements HistoryService {
         repository.save(history);
 
         return history;
+    }
+
+    @Override
+    public List<History> getHistoriesByCarNumber(String carNumber) {
+        return repository.getHistoriesByCarNumber(carNumber).stream().filter(history -> history.getFinalPoint() == null).collect(Collectors.toList());
     }
 }

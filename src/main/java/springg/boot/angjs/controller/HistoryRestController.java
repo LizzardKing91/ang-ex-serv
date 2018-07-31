@@ -33,6 +33,12 @@ public class HistoryRestController {
         return historyService.getAllHistory();
     }
 
+    @GetMapping("/history/{carNumber}")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public History getLastHistoryForCar(@PathVariable String carNumber){
+        return historyService.getHistoriesByCarNumber(carNumber).get(0);
+    }
+
     @GetMapping("/history/{address}/{carName}")
     @CrossOrigin(origins = "http://localhost:4200")
     public float getAverageRentTimeForPointAndModel(@PathVariable String address, @PathVariable String carName){

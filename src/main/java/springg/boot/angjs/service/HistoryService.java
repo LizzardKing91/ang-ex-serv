@@ -14,4 +14,6 @@ public interface HistoryService {
     void deleteHistory(Long id);
 
     History createHistory(History history);
+
+    List<History> getHistoriesByCarNumber(String carNumber);
 }
