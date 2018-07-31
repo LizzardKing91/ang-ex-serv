@@ -73,6 +73,25 @@ public class HistoryRestController {
         return ResponseEntity.created(location).build();
     }
 
+    @GetMapping("/cars/return/{carNumber}")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public History getCurrentHistory(@PathVariable String carNumber) throws NotFoundException {
+        List<History> historyList = historyService.getAllHistory();
+
+        if(historyList.isEmpty()) {
+            throw new NotFoundException("car number: " + carNumber);
+        }
+
+        List<History> currentHistoryList = historyList.stream().filter(history -> history.getCarNumber().equals(carNumber)
+                && history.getFinalPoint() == null).collect(Collectors.toList());
+
+        if(currentHistoryList.isEmpty()) {
+            throw new NotFoundException("car number: " + carNumber);
+        }
+
+        return currentHistoryList.get(0);
+    }
+
     @PutMapping("/cars/return/{id}")
     @CrossOrigin(origins = "http://localhost:4200")
     public ResponseEntity<Object> updateHistory(@RequestBody History newHistory, @PathVariable long id) {
