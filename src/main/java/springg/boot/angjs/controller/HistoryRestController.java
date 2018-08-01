@@ -58,6 +58,12 @@ public class HistoryRestController {
         return history.get();
     }
 
+    /**
+     * Method creates and persists new History object
+     * @param history is a body of post request, must contains
+     *                model of car, car's number and renter name
+     * @return request status
+     */
     @PostMapping("/cars/rent")
     @CrossOrigin(origins = "http://localhost:4200")
     public ResponseEntity<Object> rentCar(@RequestBody History history) {
@@ -79,6 +85,14 @@ public class HistoryRestController {
         return ResponseEntity.created(location).build();
     }
 
+    /**
+     *
+     * @param carNumber is number of car which is supposed
+     *                  to be returned from rent
+     * @return history without final date and rent point, for car that's not
+     *                  returned yet
+     * @throws NotFoundException if there's no unfinished rent for this car
+     */
     @GetMapping("/cars/return/{carNumber}")
     @CrossOrigin(origins = "http://localhost:4200")
     public History getCurrentHistory(@PathVariable String carNumber) throws NotFoundException {
@@ -98,6 +112,13 @@ public class HistoryRestController {
         return currentHistoryList.get(0);
     }
 
+    /**
+     *
+     * @param newHistory is request's body with at least final rent point
+     *                   where this car supposed to be returned
+     * @param id id of car
+     * @return request's status
+     */
     @PutMapping("/cars/return/{id}")
     @CrossOrigin(origins = "http://localhost:4200")
     public ResponseEntity<Object> updateHistory(@RequestBody History newHistory, @PathVariable long id) {
@@ -124,6 +145,10 @@ public class HistoryRestController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     *
+     * @param id of history that's supposed to be deleted
+     */
     @DeleteMapping("/history/{id}")
     @CrossOrigin(origins = "http://localhost:4200")
     public void deleteHistory(@PathVariable long id) {
