@@ -1,7 +1,6 @@
 package springg.boot.angjs.service;
 
 import springg.boot.angjs.model.History;
-import springg.boot.angjs.model.RentPoint;
 
 import java.util.List;
 import java.util.Optional;

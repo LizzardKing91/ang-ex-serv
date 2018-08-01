@@ -1,6 +1,5 @@
 package springg.boot.angjs.service;
 
-import org.springframework.stereotype.Service;
 import springg.boot.angjs.model.Car;
 
 import java.util.List;

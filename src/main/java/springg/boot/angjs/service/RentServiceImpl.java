@@ -11,7 +11,6 @@ import springg.boot.angjs.repository.RentPointRepository;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -40,21 +39,22 @@ public class RentServiceImpl implements RentService {
     }
 
     @Override
-    public void returnCar(History history, String rentPointAddress) {
+    public void returnCar(History history) {
         Car rentedCar = carRepository.getCarByNumber(history.getCarNumber());
 
         rentedCar.setAvailable(true);
-        rentedCar.setCurrentPoint(rentPointAddress);
+        rentedCar.setCurrentPoint(history.getFinalPoint());
+
         List<History> historyList = rentedCar.getHistoryList();
         historyList.add(history);
+
         rentedCar.setHistoryList(historyList);
-        History updHistory = historyRepository.getOne(history.getId());
-        updHistory.setFinalPoint(rentPointAddress);
+
         RentPoint point = rentPointRepository.getRentPointByAddress(rentedCar.getCurrentPoint());
         point.getCarList().add(rentedCar);
 
         rentPointRepository.save(point);
-        historyRepository.save(updHistory);
+        historyRepository.save(history);
         carRepository.save(rentedCar);
     }
 
@@ -82,6 +82,11 @@ public class RentServiceImpl implements RentService {
         return carRepository.getCarByNumber(number);
     }
 
+
+    public Car getCurrentCar(Long id) {
+        return carRepository.getOne(id);
+    }
+
     @Override
     public void setCarList(Car car) {
         if(car.getCurrentPoint() != null){
@@ -94,31 +99,70 @@ public class RentServiceImpl implements RentService {
     }
 
     @Override
-    public void updateCarList(Car car) {
-        long id = car.getId();
-        if(car.getCurrentPoint() != null){
-            RentPoint point = rentPointRepository.getRentPointByAddress(car.getCurrentPoint());
-            List<Car> newCarList = point.getCarList();
-            Optional<Car> carToDelete = newCarList.stream().filter(car1 -> car.getId() == id).findFirst();
-            if(!carToDelete.isPresent()) {
-                newCarList.add(car);
+    public void updateHistoryList(Car car) {
+        if(!car.getHistoryList().isEmpty()) {
+            for (History history: car.getHistoryList()
+                 ) {
+                history.setCarName(car.getName());
+                history.setCarNumber(car.getNumber());
+                historyRepository.save(history);
             }
-            newCarList.remove(carToDelete.get());
-            newCarList.add(car);
+        }
+    }
+
+    @Override
+    public void updateRentPointAddressForCar(RentPoint point, String oldAddress) {
+        if(!point.getCarList().isEmpty()) {
+            String newAddress = point.getAddress();
+            for (Car car: point.getCarList()
+            ) {
+                car.setCurrentPoint(point.getAddress());
+                if (!car.getHistoryList().isEmpty()) {
+                    for (History history: car.getHistoryList()
+                    ) {
+                        if(history.getStartPoint().equals(oldAddress)) {
+                            history.setStartPoint(newAddress);
+                        }
+                        if(history.getFinalPoint().equals(oldAddress)) {
+                            history.setFinalPoint(newAddress);
+                        }
+                        historyRepository.save(history);
+                    }
+                }
+                carRepository.save(car);
+            }
+        }
+    }
+
+    @Override
+    public void deleteRentPointAddressForCar(RentPoint point) {
+        if(point.getCarList().isEmpty()) {
+            return;
+        }
+
+        for (Car car: point.getCarList()
+             ) {
+            car.setCurrentPoint(null);
+
+            carRepository.save(car);
+        }
+    }
+
+    @Override
+    public void deleteCarFromCarList(String address, Long id) {
+        if(address != null){
+            RentPoint point = rentPointRepository.getRentPointByAddress(address);
+            List<Car> newCarList = point.getCarList();
+            newCarList.removeIf(car -> car.getId().equals(id));
             point.setCarList(newCarList);
             rentPointRepository.save(point);
         }
     }
 
     @Override
-    public void deleteCarFromCarList(Car car) {
-        if(car.getCurrentPoint() != null){
-            RentPoint point = rentPointRepository.getRentPointByAddress(car.getCurrentPoint());
-            List<Car> newCarList = point.getCarList();
-            newCarList.remove(car);
-            point.setCarList(newCarList);
-            rentPointRepository.save(point);
-        }
+    public boolean checkRentPoint(String address) {
+        boolean match = rentPointRepository.findAll().stream().anyMatch(rentPoint -> rentPoint.getAddress().equals(address));
+        return match;
     }
 
     private static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {

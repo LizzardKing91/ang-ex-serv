@@ -13,7 +13,9 @@ import springg.boot.angjs.service.RentService;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 public class HistoryRestController {
@@ -77,23 +79,47 @@ public class HistoryRestController {
         return ResponseEntity.created(location).build();
     }
 
+    @GetMapping("/cars/return/{carNumber}")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public History getCurrentHistory(@PathVariable String carNumber) throws NotFoundException {
+        List<History> historyList = historyService.getAllHistory();
+
+        if(historyList.isEmpty()) {
+            throw new NotFoundException("car number: " + carNumber);
+        }
+
+        List<History> currentHistoryList = historyList.stream().filter(history -> history.getCarNumber().equals(carNumber)
+                && history.getFinalPoint() == null).collect(Collectors.toList());
+
+        if(currentHistoryList.isEmpty()) {
+            throw new NotFoundException("car number: " + carNumber);
+        }
+
+        return currentHistoryList.get(0);
+    }
+
     @PutMapping("/cars/return/{id}")
     @CrossOrigin(origins = "http://localhost:4200")
-    public ResponseEntity<Object> updateHistory(@RequestBody History history, @PathVariable long id) {
-        Optional<History> historyNote = historyService.getHistory(id);
+    public ResponseEntity<Object> updateHistory(@RequestBody History newHistory, @PathVariable long id) {
+        List<History> historyList = historyService.getAllHistory();
 
-        if(!historyNote.isPresent()) {
+        if(historyList.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        history.setId(id);
-        Date date = new Date(System.currentTimeMillis());
-        history.setFinalDate(date);
-        history.setStartDate(historyNote.get().getStartDate());
-        history.setStartPoint(historyNote.get().getStartPoint());
-        history.setCarName(historyNote.get().getCarName());
+        History historyNote = historyList.stream().filter(history -> history.getFinalPoint() == null &&
+                history.getCarNumber().equals(newHistory.getCarNumber())).collect(Collectors.toList()).get(0);
 
-        rentService.returnCar(history, history.getFinalPoint());
+        if(newHistory.getFinalPoint() == null || !rentService.checkRentPoint(newHistory.getFinalPoint())) {
+            return ResponseEntity.notFound().build();
+        }
+
+
+        Date date = new Date(System.currentTimeMillis());
+        historyNote.setFinalPoint(newHistory.getFinalPoint());
+        historyNote.setFinalDate(date);
+
+        rentService.returnCar(historyNote);
 
         return ResponseEntity.noContent().build();
     }
