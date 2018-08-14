@@ -4,16 +4,18 @@ import springg.boot.angjs.model.Car;
 import springg.boot.angjs.model.History;
 import springg.boot.angjs.model.RentPoint;
 
+import java.util.List;
+
 public interface RentService {
     void rentCar(History history);
 
     void returnCar(History history);
 
-    public float getAverageTime(String address, String carName);
+    double getAverageTime(String address, String carName);
 
-    public Car getCurrentCar(String number);
+    List getAverageTimeList();
 
-    public Car getCurrentCar(Long id);
+    Car getCurrentCar(String number);
 
     void setCarList(Car car);
 
@@ -21,9 +23,9 @@ public interface RentService {
 
     boolean checkRentPoint(String address);
 
-    public void updateRentPointAddressForCar(RentPoint point, String oldAddress);
+    void updateRentPointAddressForCar(RentPoint point, String oldAddress);
 
-    public void deleteRentPointAddressForCar(RentPoint point);
+    void deleteRentPointAddressForCar(RentPoint point);
 
-    public void updateHistoryList(Car car);
+    void updateHistoryList(Car car);
 }

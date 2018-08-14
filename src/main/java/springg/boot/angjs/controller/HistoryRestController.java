@@ -43,8 +43,14 @@ public class HistoryRestController {
 
     @GetMapping("/history/{address}/{carName}")
     @CrossOrigin(origins = "http://localhost:4200")
-    public float getAverageRentTimeForPointAndModel(@PathVariable String address, @PathVariable String carName){
+    public double getAverageRentTimeForPointAndModel(@PathVariable String address, @PathVariable String carName){
         return rentService.getAverageTime(address, carName);
+    }
+
+    @GetMapping("/statistic")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public List getAverageRentTimeList(){
+        return rentService.getAverageTimeList();
     }
 
     @GetMapping("/history/{id}")

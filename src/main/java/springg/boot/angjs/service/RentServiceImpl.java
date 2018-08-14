@@ -5,12 +5,12 @@ import org.springframework.stereotype.Service;
 import springg.boot.angjs.model.Car;
 import springg.boot.angjs.model.History;
 import springg.boot.angjs.model.RentPoint;
+import springg.boot.angjs.model.Statistic;
 import springg.boot.angjs.repository.CarRepository;
 import springg.boot.angjs.repository.HistoryRepository;
 import springg.boot.angjs.repository.RentPointRepository;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -58,7 +58,7 @@ public class RentServiceImpl implements RentService {
         carRepository.save(rentedCar);
     }
 
-    public float getAverageTime(String address, String carName){
+    public double getAverageTime(String address, String carName){
         List<History> historyList = historyRepository.findAll().stream()
                 .filter(history -> history.getStartPoint()
                         .equals(address) && history.getCarName()
@@ -72,19 +72,43 @@ public class RentServiceImpl implements RentService {
 
         for (History history: historyList
              ) {
-            sum += getDateDiff(history.getStartDate(), history.getFinalDate(), TimeUnit.MILLISECONDS);
+            sum += getDateDiff(history.getStartDate(), history.getFinalDate());
         }
 
-        return (sum / historyList.size()) / 60000;
+        // get average and convert to milliseconds
+        return (sum / historyList.size()) / 1000;
+    }
+
+    @Override
+    public List<Statistic> getAverageTimeList() {
+        List<Car> cars = carRepository.findAll();
+        List<String> carModels = cars.stream().map(Car::getName).distinct().collect(Collectors.toList());
+
+        List<RentPoint> points = rentPointRepository.findAll();
+        List<String> pointsAddresses = points.stream().map(RentPoint::getAddress).collect(Collectors.toList());
+
+        List<Statistic> statisticList = new ArrayList<>();
+
+        for (String pointAddress: pointsAddresses
+             ) {
+            Statistic statistic = new Statistic(pointAddress);
+            Map<String, Double> pointCars = new HashMap<String, Double>() {
+            };
+            statistic.setCarModels(pointCars);
+            for (String carModel: carModels
+                 ) {
+                double averageTime = getAverageTime(pointAddress, carModel);
+
+                statistic.getCarModels().put(carModel, averageTime);
+            }
+            statisticList.add(statistic);
+        }
+
+        return statisticList;
     }
 
     public Car getCurrentCar(String number) {
         return carRepository.getCarByNumber(number);
-    }
-
-
-    public Car getCurrentCar(Long id) {
-        return carRepository.getOne(id);
     }
 
     @Override
@@ -165,8 +189,8 @@ public class RentServiceImpl implements RentService {
         return match;
     }
 
-    private static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
+    private static long getDateDiff(Date date1, Date date2) {
         long diffInMillies = date2.getTime() - date1.getTime();
-        return timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
+        return TimeUnit.MILLISECONDS.convert(diffInMillies,TimeUnit.MILLISECONDS);
     }
 }
